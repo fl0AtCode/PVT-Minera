@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tarjeta Digital</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <!-- Cropper.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/dashboard.html" class="navbar-brand">
+                <img src="https://res.cloudinary.com/dfczxcczj/image/upload/v1772675185/89637312-logo-isolated-on-premium-white-round-button-abstract-illustration_xls1m7.jpg"
+                    alt="Logo" style="height: 36px; width: auto; border-radius: 6px;">
+                Panel de Administración
+            </a>
+            <div class="navbar-actions">
+                <span class="text-muted" id="adminName" style="font-size: 0.85rem;"></span>
+                <button class="btn btn-secondary btn-sm" id="logoutBtn">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="dashboard-content">
+        <div class="container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div>
+                    <h1>Empleados</h1>
+                    <p class="text-muted" id="employeeCount">Cargando...</p>
+                </div>
+                <div class="dashboard-actions">
+                    <button class="btn btn-secondary btn-sm" id="dailyReportBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Reporte Diario
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="weeklyReportBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Reporte Semanal
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="exportBtn">Exportar CSV</button>
+                    <button class="btn btn-primary btn-sm" id="addEmployeeBtn">+ Agregar Empleado</button>
+                </div>
+            </div>
+
+            <!-- Búsqueda -->
+            <div class="search-bar">
+                <span class="search-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </span>
+                <input type="text" id="searchInput" placeholder="Buscar por nombre, usuario, cargo o RUT..."
+                    autocomplete="off">
+            </div>
+
+            <!-- Tabla de empleados -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <table class="employees-table">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Usuario</th>
+                            <th>Cargo</th>
+                            <th>RUT</th>
+                            <th>Fatiga</th>
+                            <th>Documentos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center" style="padding: 40px;">
+                                <div class="loading-spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Agregar/Editar Empleado -->
+    <div class="modal-overlay" id="employeeModal">
+        <div class="modal" style="max-width: 580px;">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar Empleado</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+
+            <form id="employeeForm" enctype="multipart/form-data">
+                <input type="hidden" id="employeeId" value="">
+                <!-- Datos ocultos para las imágenes recortadas -->
+                <input type="hidden" id="croppedPhotoData" value="">
+                <input type="hidden" id="croppedHeaderData" value="">
+
+                <div class="form-group">
+                    <label for="empUsername">Nombre de usuario (para login) *</label>
+                    <input type="text" id="empUsername" class="form-control" placeholder="juanperez" required>
+                </div>
+
+                <div class="form-group" id="passwordGroup">
+                    <label for="empPassword">Contraseña *</label>
+                    <input type="password" id="empPassword" class="form-control" placeholder="Mínimo 6 caracteres"
+                        minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label for="empName">Nombre completo *</label>
+                    <input type="text" id="empName" class="form-control" placeholder="Juan Pérez López" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="empEmail">Correo electrónico (opcional)</label>
+                    <input type="email" id="empEmail" class="form-control" placeholder="juan@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="empPhone">Teléfono</label>
+                    <input type="tel" id="empPhone" class="form-control" placeholder="+56 9 1234 5678">
+                </div>
+
+                <div class="form-group">
+                    <label for="empPosition">Cargo</label>
+                    <input type="text" id="empPosition" class="form-control" placeholder="Gerente Comercial">
+                </div>
+
+                <div class="form-group">
+                    <label for="empRut">RUT (9 dígitos, solo números)</label>
+                    <input type="text" id="empRut" class="form-control" placeholder="123456789" maxlength="9"
+                        pattern="[0-9kK]{9}" title="Ingresa 9 dígitos (incluido dígito verificador)">
+                    <small class="text-muted" id="rutPreview" style="margin-top: 4px; display: block;"></small>
+                </div>
+
+                <!-- Foto del empleado con cropper -->
+                <div class="form-group">
+                    <label>Foto del empleado (500 x 500 px)</label>
+                    <div class="photo-upload-area" id="photoUploadArea">
+                        <img class="photo-preview" id="photoPreview" alt="Preview">
+                        <div class="photo-upload-text" id="photoUploadText">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5"
+                                style="display: block; margin: 0 auto 8px; color: var(--text-muted);">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                <path d="M21 15l-5-5L5 21" />
+                            </svg>
+                            Haz clic o arrastra una imagen
+                        </div>
+                        <input type="file" id="empPhoto" accept="image/*">
+                    </div>
+                </div>
+
+                <!-- Header de la tarjeta con cropper -->
+                <div class="form-group">
+                    <label>Imagen de cabecera (1200 x 400 px)</label>
+                    <div class="photo-upload-area" id="headerUploadArea"
+                        style="border-color: var(--primary-light); border-style: dashed;">
+                        <img class="photo-preview" id="headerPreview" alt="Preview header"
+                            style="border-radius: 8px; width: 100%; height: 80px; object-fit: cover;">
+                        <div class="photo-upload-text" id="headerUploadText">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5"
+                                style="display: block; margin: 0 auto 8px; color: var(--text-muted);">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <path d="M2 8h20" />
+                            </svg>
+                            Imagen de fondo para la cabecera
+                        </div>
+                        <input type="file" id="empHeader" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Cropper de imágenes -->
+    <div class="modal-overlay" id="cropperModal" style="z-index: 1100;">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="cropperTitle">Ajustar imagen</h2>
+                <button class="modal-close" id="closeCropper">&times;</button>
+            </div>
+            <div style="max-height: 400px; overflow: hidden;">
+                <img id="cropperImage" style="max-width: 100%; display: block;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cropperCancel">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="cropperAccept">Recortar y guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Selector de fecha para reportes -->
+    <div class="modal-overlay" id="reportDateModal">
+        <div class="modal" style="max-width: 380px;">
+            <div class="modal-header">
+                <h2 id="reportDateTitle">Seleccionar fecha</h2>
+                <button class="modal-close" id="closeReportDate">&times;</button>
+            </div>
+            <div class="form-group">
+                <label id="reportDateLabel" for="reportDateInput">Fecha del reporte</label>
+                <input type="date" id="reportDateInput" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelReportDate">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="downloadReport">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Descargar Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+
+</html>

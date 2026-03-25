@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Portal - Tarjeta Digital</title>
+    <meta name="description" content="Portal del trabajador - Tarjeta Digital">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <!-- ============================================ -->
+    <!-- VISTA: Menú del Empleado                     -->
+    <!-- ============================================ -->
+    <div class="employee-menu-wrapper" id="employeeMenu">
+        <div class="employee-menu-card">
+            <!-- Logo empresa -->
+            <img src="https://res.cloudinary.com/dfczxcczj/image/upload/v1772675185/89637312-logo-isolated-on-premium-white-round-button-abstract-illustration_xls1m7.jpg"
+                alt="Logo Empresa" class="logo"
+                style="display: block; width: 80px; height: 80px; margin: 0 auto 20px; object-fit: contain;">
+
+            <h1 style="text-align: center; font-size: 1.4rem; margin-bottom: 6px;">Mi Portal</h1>
+            <p id="employeeGreeting" class="text-muted"
+                style="text-align: center; font-size: 0.9rem; margin-bottom: 32px;">
+                Bienvenido
+            </p>
+
+            <!-- Estado de fatiga anterior -->
+            <div id="fatigueStatusCard" class="fatigue-status-card" style="display: none;">
+                <div class="fatigue-status-header">
+                    <span>Último test PVT</span>
+                    <span id="fatigueDate" class="fatigue-date"></span>
+                </div>
+                <div class="fatigue-status-body">
+                    <span id="fatigueBadge" class="fatigue-badge"></span>
+                    <span id="fatigueDetail" class="text-muted" style="font-size: 0.8rem;"></span>
+                </div>
+            </div>
+
+            <!-- Botones del menú -->
+            <div class="employee-menu-buttons">
+                <button class="btn btn-primary btn-block btn-lg" id="viewCardBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    Ver mi tarjeta digital
+                </button>
+
+                <button class="btn btn-secondary btn-block btn-lg" id="startTestBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Hacer test PVT
+                </button>
+            </div>
+
+            <button class="btn btn-sm" id="logoutBtnEmployee"
+                style="width: 100%; margin-top: 16px; color: var(--text-muted); background: transparent;">
+                Cerrar sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- VISTA: Test PVT (3 minutos)                  -->
+    <!-- ============================================ -->
+    <div class="pvt-wrapper" id="pvtView" style="display: none;">
+        <!-- Encabezado del test -->
+        <div class="pvt-header">
+            <button class="btn btn-secondary btn-sm" id="pvtBackBtn">← Volver</button>
+            <h2>Test de Vigilancia PVT</h2>
+            <div class="pvt-stats">
+                <span id="pvtTimer" class="pvt-timer">3:00</span>
+                <span id="pvtScore" class="pvt-score">0 estímulos</span>
+                <span id="pvtLapses" class="pvt-lapses">0 lapsos</span>
+            </div>
+        </div>
+
+        <!-- Instrucciones (antes de iniciar) -->
+        <div class="pvt-instructions" id="pvtInstructions">
+            <div class="pvt-instructions-card">
+                <div class="pvt-instructions-icon">🎯</div>
+                <h3>Test PVT - ¿Cómo funciona?</h3>
+                <p>Aparecerá un <strong>botón rojo con una X</strong> en diferentes posiciones de la pantalla a
+                    intervalos aleatorios.</p>
+                <p>Debes hacer <strong>clic lo más rápido posible</strong> cada vez que aparezca.</p>
+                <div style="margin-top: 16px; text-align: left;">
+                    <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 4px;">
+                        ⏱ Duración: <strong>3 minutos</strong>
+                    </p>
+                    <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 4px;">
+                        🎯 Aparecerán aproximadamente <strong>20-30 estímulos</strong>
+                    </p>
+                    <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 4px;">
+                        ⚠️ <strong>No hagas clic antes</strong> de que aparezca el botón (falsa alarma)
+                    </p>
+                    <p class="text-muted" style="font-size: 0.82rem;">
+                        📊 Se medirá tu <strong>tiempo de reacción</strong> en milisegundos
+                    </p>
+                </div>
+                <button class="btn btn-primary btn-block" id="pvtStartBtn" style="margin-top: 24px;">
+                    Comenzar test
+                </button>
+            </div>
+        </div>
+
+        <!-- Área de juego PVT -->
+        <div class="pvt-arena" id="pvtArena" style="display: none;">
+            <div class="pvt-arena-border" id="pvtArenaBorder">
+                <!-- El botón rojo aparece aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- Modal: Resultado del test                    -->
+    <!-- ============================================ -->
+    <div class="modal-overlay" id="pvtResultModal">
+        <div class="modal confirm-modal" style="max-width: 440px;">
+            <div style="text-align: center; padding: 8px 0;">
+                <!-- Ícono según resultado -->
+                <div id="resultIcon" class="pvt-result-icon"></div>
+
+                <p id="resultDescription"
+                    style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin: 16px 0;"></p>
+
+                <div id="resultBadge" class="fatigue-badge fatigue-badge-lg" style="margin: 16px auto;"></div>
+
+                <!-- Métricas detalladas -->
+                <div id="resultMetrics" style="margin: 20px 0;"></div>
+
+                <p id="resultAction" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px;"></p>
+
+                <button class="btn btn-primary btn-block" id="resultAcceptBtn" style="margin-top: 24px;">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/js/employee.js"></script>
+</body>
+
+</html>
